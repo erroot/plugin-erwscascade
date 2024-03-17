@@ -3,7 +3,7 @@
 ## 主要功能
   基于websocket 实现多个m7s级联
   - 支持http请求代理（webscoket 代理），实现实时控制下级平台信令通道
-  - 支持公网级联，下级平台在net 后面（如4G 网络）
+  - 支持公网级联，下级平台在局域网（如4G 网络）
   - 支持上级平台只开放一个端口实现级联（http/https端口）要求支持websocket 配置网关代理时需要注意
   - 支持音视频级联（下级平台推流到上级平台）
   - 支持推流协议： rtmp 推流，rtsp 推流， websocket flv 推流等（上级平台端口资源限制开放，仅需http/https端口）
@@ -24,6 +24,7 @@ import (
 ## 配置
 
 # websocket级联配置
+---
 erwscascade:
   cid: "test-c001"            #本机平台ID 不配置则随机uuid
   server:                     #级联上级平台配置，支持同时接入多个上级平台
@@ -36,6 +37,7 @@ erwscascade:
     repush: -1
     pushlist:
       njtv/glgc: ws://127.0.0.1:8450/erwscascade/wspush/on #推送本地流到上级平台，新的streamPath 为 streamPath-cid
+---
 ## API
 ## server API
 - `/erwscascade/httpproxy?cid=test-c001&httpPath=[dympath]`  ，http协议透传接口
