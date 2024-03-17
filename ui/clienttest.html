@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Camera Feed</title>
+</head>
+<body>
+    <canvas id="canvas" width="640" height="480"></canvas>
+
+
+    <button id="wsMsgSendBtn" width="80" height="40">ws发送测试消息</button>
+
+
+    <script>
+        const imgWidth = 1920;
+        const imgHeight = 1080;
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+
+
+        const ws = new WebSocket('ws://localhost:8440/erwscascade/wspush/on?cid=test-c001&streamPath=njtv/glgc');
+
+        ws.binaryType = 'arraybuffer';
+        const imageData = ctx.createImageData(imgWidth, imgHeight);
+
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = imgWidth;
+        tempCanvas.height = imgHeight;
+        const tempCtx = tempCanvas.getContext('2d');
+
+        const wsMsgSendBtn = document.getElementById('wsMsgSendBtn');
+
+        var deviceInfo={
+            "method": "deviceInfo",
+            "name": "html 客户端",
+            "serial": "SNVR-01029-003932-1330"
+        }
+
+
+        // 为该按钮绑定点击事件处理程序
+        wsMsgSendBtn.addEventListener('click', function() {
+            //alert('按钮被点击了!');
+
+             //调用sendMessage函数发送消息
+             sendMessage(JSON.stringify(deviceInfo));
+        });
+
+        
+        // 在打开连接前添加自定义header
+        ws.onopen = function(event) {
+            // 设置自定义header [clientId]
+            //ws.headers = { 'clientId': 'your-client-id-html' };
+            console.log('open succes: ');
+           
+        };
+
+        // 接收到服务器消息的处理
+        ws.onmessage = function(event) {
+            console.log('Received Message: ', event.data);
+        };
+
+        // 发送消息
+       function sendMessage(message) {
+            ws.send(message);
+        }
+
+
+        // 当WebSocket连接关闭时
+        ws.onclose = function(event) {
+            console.log("WebSocket disconnected");
+        };
+ 
+        // 当有错误发生时
+        ws.onerror = function(error) {
+            console.log("WebSocket error observed:", error);
+        };
+
+    
+
+    </script>
+</body>
+</html>
