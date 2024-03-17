@@ -39,7 +39,7 @@ erwscascade:
       njtv/glgc: ws://127.0.0.1:8450/erwscascade/wspush/on #推送本地流到上级平台，新的streamPath 为 streamPath-cid
 ```
 ## API
-## server API
+### server API
 - `/erwscascade/httpproxy?cid=test-c001&httpPath=[dympath]`  ，http协议透传接口
 - xx_m7s_url_xx 含义是 m7s 普通url 链接
 - cid: 客户端ID(必须)
@@ -65,8 +65,8 @@ browser <-- |                   -- server --                    -- client --    
             |<--------------------         --------------------          --------------------|
                 RSP sdp                           ws sdp                         RSP sdp
 -->
-
-
+### client API
+### `erwscascade/api/push?target=[websocket地址]&streamPath=[流标识]`
 ```go
 # websocket 消息体
 
