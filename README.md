@@ -24,9 +24,7 @@ import (
 ## 配置
 
 # websocket级联配置
-```markdown
-
-```golang
+```go
 erwscascade:
   cid: "test-c001"            #本机平台ID 不配置则随机uuid
   server:                     #级联上级平台配置，支持同时接入多个上级平台
@@ -39,6 +37,7 @@ erwscascade:
     repush: -1
     pushlist:
       njtv/glgc: ws://127.0.0.1:8450/erwscascade/wspush/on #推送本地流到上级平台，新的streamPath 为 streamPath-cid
+```
 ## API
 ## server API
 - `/erwscascade/httpproxy?cid=test-c001&httpPath=[dympath]`  ，http协议透传接口
@@ -68,9 +67,9 @@ browser <-- |                   -- server --                    -- client --    
 -->
 
 
-```markdown
+```go
 # websocket 消息体
-```golang
+
 type ProxyMessage struct {
 	Url    string      `json:"url"`
 	Header http.Header `json:"header"`
@@ -89,6 +88,7 @@ const (
 	HTTPProxyRsp
 	// 在此添加更多的枚举成员
 )
+```
 ## 使用erwscascade注意事项
 
 - 无
