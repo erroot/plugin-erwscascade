@@ -4,10 +4,10 @@
   基于websocket 实现多个m7s级联
   - 支持http请求代理（webscoket 代理），实现实时控制下级平台信令通道
   - 支持公网级联，下级平台在局域网（如4G 网络）
-  - 支持上级平台只开放一个端口实现级联（http/https端口）要求支持websocket 配置网关代理时需要注意
+  - 支持一个端口级联（http/https端口）要求支持websocket
   - 支持音视频级联（下级平台推流到上级平台）
   - 支持推流协议： rtmp 推流，rtsp 推流， websocket flv 推流等（上级平台端口资源限制开放，仅需http/https端口）
-  注： rtmp 推流，rtsp 推流 是m7s 开发源插件功能，需要使能相关插件
+  - rtmp 推流，rtsp 推流功能是m7s 开源源插件功能，需要使能相关插件
 
 ## 插件地址
 
