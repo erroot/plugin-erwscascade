@@ -21,6 +21,7 @@ var responseChan = make(chan CascadingWsMessage)
 type WsClientConn struct {
 	Conn    *net.Conn
 	RspChan chan CascadingWsMessage
+	CInfo   ClientInfo
 }
 
 var clientConnections = make(map[string]*WsClientConn)
@@ -126,6 +127,7 @@ func (p *ErWsCascadeConfig) receiveWsMessages(client *WsClientConn, cid string) 
 				continue
 			}
 			log.Println("Parsed ClientInfo:", clientInfo)
+			client.CInfo = clientInfo
 		} else {
 			log.Println("MessageType is:", wsMessage.Type.String())
 		}

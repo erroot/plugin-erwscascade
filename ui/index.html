@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Jessibuca mult demo</title>
+    <!--  @media  才起作用 -->
+    <meta name="viewport" content="width=device-width" initial-scale="1.0">
+    <script src="./jessibuca-pro-demo.js"></script>
+    <!-- 
+    <script src="./jessibuca.js"></script>
+    -->
+    <script src="./jquery-3.6.4.min.js"></script>
+    <style>
+        .root {
+            display: flex;
+            place-content: center;
+            margin-top: 3rem;
+        }
+
+        .container-shell {
+            backdrop-filter: blur(5px);
+            background: hsla(0, 0%, 50%, 0.5);
+            padding: 30px 4px 10px 4px;
+            /* border: 2px solid black; */
+            width: 80vw;
+            height: 80vh;
+            position: relative;
+            border-radius: 5px;
+            box-shadow: 0 10px 20px;
+            display: flex;  /*内部div 横向排列*/
+        }
+
+        .container-shell:before {
+            content: "jessibuca demo player";
+            position: absolute;
+            color: darkgray;
+            top: 4px;
+            left: 10px;
+            text-shadow: 1px 1px black;
+        }
+        
+        .tree-list-box{
+            height: 100%;
+            width: 280px;
+            background-color: #98a5a5;
+            overflow-y: auto;
+        }
+
+        .tree-list-box li{
+            margin: 10px 5px;
+        }
+
+        .tree-list-box .client-list{
+            margin-bottom: 20px;
+            border-bottom:1px solid #090909;
+        }
+
+        .sup-video-player {
+            display: grid;
+            grid-template-columns: 100%;
+            grid-template-rows: calc(100% - 48px) 48px;
+            height: 100%;
+            width: calc(100% - 280px) ;
+        }
+
+        .sup-video-player .hide{
+            display: none;
+        }
+
+        .sup-video-player .video-list {
+            flex: 1 1 auto;
+            background: #98a5a5;
+            display: grid;
+        }
+        .sup-video-player .video-list .video-item {
+            background: #95a0a0;
+            /* border: 1px solid #052524;*/
+            cursor: pointer;
+            position: relative;
+
+            width: 100%;
+            height: 100%;
+        }
+        .sup-video-player .video-list .video-item.hide {
+           display: none;
+        }
+
+        .sup-video-player .video-list .video-item.active {
+            /*border: 1px solid #009586;
+            box-shadow: inset 0 0 2px 2px #ffba00;
+            */
+            background: #ffba00;
+        }
+        .sup-video-player .video-list.video-split-6 {
+            grid-template-columns: 33.33% 33.33% 33.33%;
+            grid-template-rows: 33.33% 33.33% 33.33%;
+        }
+        .sup-video-player .video-list.video-split-6 .video-item.video-item-1 {
+            grid-column-start: 1;
+            grid-column-end: 3;
+            grid-row-start: 1;
+            grid-row-end: 3;
+        }
+
+        .sup-video-player .video-list.video-split-8 {
+            grid-template-columns: 25% 25% 25% 25%;
+            grid-template-rows: 25% 25% 25% 25%;
+        }
+        .sup-video-player .video-list.video-split-8 .video-item.video-item-1 {
+            grid-column-start: 1;
+            grid-column-end: 4;
+            grid-row-start: 1;
+            grid-row-end: 4;
+        }
+
+        .sup-video-player .video-list.video-split-9 {
+            grid-template-columns: 33.33% 33.33% 33.33%;
+            grid-template-rows: 33.33% 33.33% 33.33%;
+        }
+
+        .sup-video-player .video-list.video-split-10 {
+            grid-template-columns: 20% 20% 20% 20% 20%;
+            grid-template-rows: 20% 20% 20% 20% 20%;
+        }
+        .sup-video-player .video-list.video-split-10 .video-item.video-item-1 {
+            grid-column-start: 1;
+            grid-column-end: 5;
+            grid-row-start: 1;
+            grid-row-end: 5;
+        }
+   
+
+        .sup-video-player .video-list.video-split-16 {
+            grid-template-columns: 25% 25% 25% 25%;
+            grid-template-rows: 25% 25% 25% 25%;
+        }
+        
+        .sup-video-player .video-list.video-split-25 {
+            grid-template-columns: 20% 20% 20% 20% 20%;
+            grid-template-rows: 20% 20% 20% 20% 20%;
+        }
+
+        .sup-video-player .video-list.video-split-64 {
+            grid-template-columns: 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5%;
+            grid-template-rows: 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5%;
+        }
+
+        .sup-video-player .video-list.video-split-1 {
+            grid-template-columns: 100%;
+            grid-template-rows: 100%;
+        }
+        .sup-video-player .video-list.video-split-4 {
+            grid-template-columns: 50% 50%;
+            grid-template-rows: 50% 50%;
+        }
+    
+        .sup-video-player .video-tools {
+            background: #95a0a0;
+        }
+        .sup-video-player .video-tools ul {
+            display: flex;
+            list-style: none;
+            padding: 0 10px;
+            margin: 0;
+            line-height: 48px;
+        }
+        .sup-video-player .video-tools ul  .icon {
+            cursor: pointer;
+        }
+        .sup-video-player .video-tools ul  li {
+            margin: 0 8px;
+            position:relative;
+        }
+        .sup-video-player .video-tools ul  li svg{
+            margin-top: 8px;
+            width: 32px;
+            height: 32px;
+        }
+        .sup-video-player .video-tools ul  .iconfont {
+            font-size: 24px;
+        }
+        .sup-video-player .video-tools .unrecording .recording-icon{
+            display: none;
+        }
+        .sup-video-player .video-tools .unrecording .unrecording-icon{
+            display: block;
+        }
+        .sup-video-player .video-tools .recording .unrecording-icon{
+            display: none;
+        }
+        .sup-video-player .video-tools .recording .recording-icon{
+            display: block;
+        }
+
+        .container {
+            /*background: rgba(13, 14, 27, 0.7);*/
+            background:#090909;
+            width: calc(100% - 2px);
+            height: calc(100% - 2px);
+            display: inline-block;
+            margin: 1px;
+            text-align: center;
+            color: #ffba00;
+        }
+
+        .input {
+            display: flex;
+            margin-top: 10px;
+            color: white;
+            place-content: stretch;
+        }
+
+        .input2 {
+            bottom: 0px;
+        }
+
+        .input input {
+            flex: auto;
+        }
+
+        .err {
+            position: absolute;
+            top: 40px;
+            left: 10px;
+            color: red;
+        }
+
+        .option {
+            position: absolute;
+            top: 4px;
+            right: 10px;
+            display: flex;
+            place-content: center;
+            font-size: 12px;
+        }
+
+        .option span {
+            color: white;
+        }
+
+        .page {
+            background: url('http://jessibuca.monibuca.com/bg.jpg');
+            background-repeat: no-repeat;
+            background-position: top;
+        }
+
+        /* @media (max-width: 720px) {
+            .container {
+                width: 90vw;
+                height: 52.7vw;
+            }
+        } */
+
+        /*当屏幕尺寸小于720px时，应用下面的CSS样式*/
+        @media screen and (max-width: 720px){ 
+
+
+            /*竖屏*/ 
+            .container-shell {
+                width: 100vw;
+                height: 100vh;
+                padding: 0;
+            }
+            .sup-video-player {
+                position: absolute;
+                height: 50vh;
+                width: calc(100% - 6px);
+            }
+            .tree-list-box{
+                position: absolute;
+                top:55vh;
+                height: 45vh;
+                width: 100%;
+            }
+            .pc-only{
+                display: none;
+            }
+
+            .sup-video-player .video-tools ul li svg {
+                width: 20px;
+                height: 20px;
+            }
+           
+        }
+        /*横屏*/ 
+        /*  */
+        @media  (max-width: 720px)  and (orientation : landscape) { 
+          
+            .root{
+                margin: 0;
+            }
+            .container-shell {
+                width: 100vw;
+                height: 100vh;
+                padding: 0;
+            }
+
+            .sup-video-player {
+                position: relative;
+                top:0;
+                width: 70vw;
+                height: 100%;
+            }
+            .tree-list-box{
+                position: relative;
+                top:0;
+                left: 0;
+                width: 30vw;
+                height: 100%;
+                background-color: #ffba00;
+            }
+            .pc-only{
+                display: none;
+            }
+
+            .sup-video-player .video-tools ul li svg {
+                margin-top: 8px;
+                width: 24px;
+                height: 24px;
+            }
+        }
+      
+    </style>
+</head>
+<body class="page">
+<div class="root">
+    <div class="container-shell">
+      
+        <div class="tree-list-box">
+            <button onclick=getStreamListBtnFunc() style="width: 120px; height: 38px;">刷新列表</button>
+            <select id="protocalSelectId">
+                <option value="http-flv">HTTP-FLV</option>
+                <option value="hls">hls</option>
+                <option value="wss">websocket</option>
+                <option value="webTransport">webTransport</option>
+                <option value="webrtc">webrtc</option>
+            </select>
+
+            <div class="client-list" >
+                <span class="list-name">级联平台列表</span>
+                <ul id="clientlistId">
+                    <li class="client-item">
+                        <a onclick="clientItemClick('')" >
+                            本级
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="streams-list" >
+                <span class="list-name" id="streamlistName">本级流列表</span>
+                <ul id="streamlistId">
+                    <li class="stream-item">
+                        <a onclick="streamItemClick('http://live4.nbs.cn/channels/njtv/glgc/hd.m3u8')" >
+                            njtv/glgc
+                        </a>
+                    </li>
+                    <li class="stream-item">
+                        <a onclick="streamItemClick('http://live4.nbs.cn/channels/njtv/bjg/hd.m3u8')" >
+                            njtv/bjg
+                        </a>
+                    </li>
+                    <li class="stream-item">
+                        <a onclick="streamItemClick('http://live4.nbs.cn/channels/njtv/zjsttl/hd.m3u8')" >
+                            njtv/zjsttl
+                        </a>
+                    </li>
+                    <li class="stream-item">
+                        <a onclick="streamItemClick('http://live4.nbs.cn/channels/njtv/jsj_njy/hd.m3u8')" >
+                            njtv/njy
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+        <div class="sup-video-player">
+            <div id="videoListBoxId" class="video-list video-split-1">
+                <!-- 
+                <div class="video-item splitNum video-item-1 active">
+                    <div class="container" id="container1">1</div>
+                </div>
+                <div class="video-item splitNum video-item-2">
+                    <div class="container" id="container2">2</div>
+                </div>
+                <div class="video-item splitNum video-item-3">
+                    <div class="container" id="container3">3</div>
+                 </div>
+                 <div class="video-item splitNum video-item-4">
+                    <div class="container" id="container4">4</div>
+                </div>
+                <div class="video-item  splitNum video-item-5">
+                    <div class="container" id="container5">5</div>
+                </div>
+                <div class="video-item splitNum video-item-6" >
+                    <div class="container" id="container6">6</div>
+                </div>
+                <div class="video-item splitNum video-item-7" >
+                    <div class="container" id="container6">7</div>
+                </div>
+                <div class="video-item splitNum video-item-8" >
+                    <div class="container" id="container6">8</div>
+                </div>
+                <div class="video-item splitNum video-item-9" >
+                    <div class="container" id="container6">9</div>
+                </div>
+                <div class="video-item splitNum video-item-10" >
+                    <div class="container" id="container6">10</div>
+                </div>
+                <div class="video-item splitNum video-item-11" >
+                    <div class="container" id="container6">11</div>
+                </div>
+                <div class="video-item splitNum video-item-12" >
+                    <div class="container" id="container6">12</div>
+                </div>
+                <div class="video-item splitNum video-item-13" >
+                    <div class="container" id="container6">13</div>
+                </div>
+                <div class="video-item splitNum video-item-14" >
+                    <div class="container" id="container6">14</div>
+                </div>
+                <div class="video-item splitNum video-item-15" >
+                    <div class="container" id="container6">15</div>
+                </div>
+                <div class="video-item splitNum video-item-16" >
+                    <div class="container" id="container6">16</div>
+                </div>
+                -->
+            </div>
+            <div class="video-tools">
+                <!-- -->
+                  <ul>
+                    <li>
+                          <a href='javascript:;' onclick=closeAll()
+                            onmousemove="showtip('<b>关闭所有</b>')" 
+                            onmouseout=hidetip() 
+                            >
+                            <svg t="1679500411249" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="13848" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64"><path d="M872.802928 755.99406 872.864326 755.99406 872.864326 755.624646Z" fill="#272536" p-id="13849"></path><path d="M927.846568 511.997953c0-229.315756-186.567139-415.839917-415.838893-415.839917-229.329059 0-415.85322 186.524161-415.85322 415.839917 0 229.300406 186.524161 415.84094 415.85322 415.84094C741.278405 927.838893 927.846568 741.29836 927.846568 511.997953M512.007675 868.171955c-196.375529 0-356.172979-159.827125-356.172979-356.174002 0-196.374506 159.797449-356.157629 356.172979-356.157629 196.34483 0 356.144326 159.783123 356.144326 356.157629C868.152001 708.34483 708.352505 868.171955 512.007675 868.171955" fill="#272536" p-id="13850"></path><path d="M682.378947 642.227993 553.797453 513.264806 682.261267 386.229528c11.661597-11.514241 11.749602-30.332842 0.234337-41.995463-11.514241-11.676947-30.362518-11.765975-42.026162-0.222057L511.888971 471.195665 385.223107 344.130711c-11.602246-11.603269-30.393217-11.661597-42.025139-0.059352-11.603269 11.618619-11.603269 30.407544-0.059352 42.011836l126.518508 126.887922L342.137823 639.104863c-11.662621 11.543917-11.780301 30.305213-0.23536 41.96988 5.830799 5.89015 13.429871 8.833179 21.086248 8.833179 7.53972 0 15.136745-2.8847 20.910239-8.569166l127.695311-126.311801L640.293433 684.195827c5.802146 5.8001 13.428847 8.717546 21.056572 8.717546 7.599072 0 15.165398-2.917446 20.968567-8.659217C693.922864 672.681586 693.950494 653.889591 682.378947 642.227993" fill="#272536" p-id="13851"></path></svg>
+                          </a>
+                    </li>
+            
+                    <li>
+                          <a href='javascript:;' onclick=closeCurCell()
+                            onmousemove="showtip('<b>关闭选中单元格</b>')" 
+                            onmouseout=hidetip() 
+                          >
+                             <svg t="1679500357973" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="12354" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64"><path d="M0 0h1024v1024H0z" fill="#FF0033" fill-opacity="0" p-id="12355"></path><path d="M240.448 168l2.346667 2.154667 289.92 289.941333 279.253333-279.253333a42.666667 42.666667 0 0 1 62.506667 58.026666l-2.133334 2.346667-279.296 279.210667 279.274667 279.253333a42.666667 42.666667 0 0 1-58.005333 62.528l-2.346667-2.176-279.253333-279.253333-289.92 289.962666a42.666667 42.666667 0 0 1-62.506667-58.005333l2.154667-2.346667 289.941333-289.962666-289.92-289.92a42.666667 42.666667 0 0 1 57.984-62.506667z" fill="#111111" p-id="12356"></path></svg>
+                          </a>
+                    </li>
+
+                    <li>
+                        <a href='javascript:;' onclick=recordCcontrol()
+                              id="recordCcontrolBtnId"
+                              onmousemove="showtip('<b>录像</b>')" 
+                              onmouseout=hidetip() 
+                              class="unrecording"
+                          >
+                          <svg t="1680669899356" class="icon unrecording-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2771" width="64" height="64"><path d="M943.776 260.16c-10.016-5.696-22.304-5.568-32.256 0.416l-160 96c-1.088 0.672-1.76 1.728-2.752 2.496-1.76 1.376-3.392 2.72-4.832 4.416-1.344 1.568-2.368 3.232-3.36 4.992-0.992 1.76-1.888 3.488-2.528 5.44-0.704 2.112-1.024 4.192-1.28 6.4C736.608 381.6 736 382.688 736 384l0 352c0 17.664-14.336 32-32 32L160 768c-17.632 0-32-14.336-32-32L128 288c0-17.632 14.368-32 32-32l544 0c17.696 0 32-14.336 32-32s-14.304-32-32-32L160 192C107.072 192 64 235.072 64 288l0 448c0 52.928 43.072 96 96 96l544 0c52.928 0 96-43.072 96-96l0-38.88 111.648 66.368C916.672 766.496 922.336 768 928 768c5.472 0 10.912-1.408 15.808-4.192C953.824 758.112 960 747.488 960 736L960 288C960 276.48 953.824 265.824 943.776 260.16zM896 679.744l-96-57.024 0-220.608 96-57.6L896 679.744z" fill="#2c2c2c" p-id="2772"></path><path d="M192 384c0 35.296 28.704 64 64 64s64-28.704 64-64-28.704-64-64-64S192 348.704 192 384z" fill="#2c2c2c" p-id="2773"></path></svg>
+                          <svg t="1680669899356" class="icon recording-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2771" width="64" height="64"><path d="M943.776 260.16c-10.016-5.696-22.304-5.568-32.256 0.416l-160 96c-1.088 0.672-1.76 1.728-2.752 2.496-1.76 1.376-3.392 2.72-4.832 4.416-1.344 1.568-2.368 3.232-3.36 4.992-0.992 1.76-1.888 3.488-2.528 5.44-0.704 2.112-1.024 4.192-1.28 6.4C736.608 381.6 736 382.688 736 384l0 352c0 17.664-14.336 32-32 32L160 768c-17.632 0-32-14.336-32-32L128 288c0-17.632 14.368-32 32-32l544 0c17.696 0 32-14.336 32-32s-14.304-32-32-32L160 192C107.072 192 64 235.072 64 288l0 448c0 52.928 43.072 96 96 96l544 0c52.928 0 96-43.072 96-96l0-38.88 111.648 66.368C916.672 766.496 922.336 768 928 768c5.472 0 10.912-1.408 15.808-4.192C953.824 758.112 960 747.488 960 736L960 288C960 276.48 953.824 265.824 943.776 260.16zM896 679.744l-96-57.024 0-220.608 96-57.6L896 679.744z" fill="#d81e06" p-id="2772"></path><path d="M192 384c0 35.296 28.704 64 64 64s64-28.704 64-64-28.704-64-64-64S192 348.704 192 384z" fill="#d81e06" p-id="2773"></path></svg>
+                        </a>
+                    </li>
+
+                    <li>
+                          <a href='javascript:;' onclick=screenshot()
+                            onmousemove="showtip('<b>截图</b>')" 
+                            onmouseout=hidetip() 
+                          >
+                            <svg t="1679500447364" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="14728" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64"><path d="M738.357895 824.589474c-10.778947 0-18.863158 8.084211-18.863158 18.863158V943.157895c0 5.389474-2.694737 8.084211-8.084211 8.08421H142.821053c-5.389474 0-8.084211-2.694737-8.084211-8.08421V80.842105c0-5.389474 2.694737-8.084211 8.084211-8.08421h568.589473c5.389474 0 8.084211 2.694737 8.084211 8.08421v361.094737c0 10.778947 8.084211 18.863158 18.863158 18.863158s18.863158-8.084211 18.863158-18.863158V80.842105c0-24.252632-21.557895-45.810526-45.810527-45.810526H142.821053c-24.252632 0-43.115789 21.557895-43.11579 45.810526v862.31579c0 24.252632 21.557895 45.810526 45.810526 45.810526h568.589474c24.252632 0 45.810526-21.557895 45.810526-45.810526v-99.705263c-2.694737-10.778947-10.778947-18.863158-21.557894-18.863158z" fill="#101010" p-id="14729"></path><path d="M808.421053 687.157895l-45.810527-45.810527 156.294737-156.294736c8.084211-8.084211 8.084211-18.863158 0-26.947369s-18.863158-8.084211-26.947368 0l-156.294737 156.294737-153.6-156.294737c-8.084211-8.084211-18.863158-8.084211-26.947369 0s-8.084211 18.863158 0 26.947369l156.294737 156.294736-45.810526 45.810527c-29.642105-16.168421-70.063158-13.473684-94.315789 10.778947-29.642105 29.642105-29.642105 78.147368 0 107.789474 13.473684 13.473684 35.031579 21.557895 53.894736 21.557895 21.557895 0 40.421053-8.084211 53.894737-21.557895 24.252632-24.252632 29.642105-64.673684 10.778948-94.31579l45.810526-45.810526 45.810526 45.810526c-16.168421 29.642105-13.473684 67.368421 10.778948 94.31579 13.473684 13.473684 35.031579 21.557895 53.894736 21.557895 21.557895 0 40.421053-8.084211 53.894737-21.557895 29.642105-29.642105 29.642105-78.147368 0-107.789474-21.557895-24.252632-61.978947-29.642105-91.621052-10.778947z m-153.6 91.621052c-13.473684 13.473684-40.421053 13.473684-56.589474 0-16.168421-16.168421-16.168421-40.421053 0-56.589473 8.084211-8.084211 16.168421-10.778947 26.947368-10.778948s21.557895 5.389474 26.947369 10.778948c18.863158 16.168421 18.863158 43.115789 2.694737 56.589473z m220.968421 0c-13.473684 13.473684-40.421053 13.473684-56.589474 0-16.168421-16.168421-16.168421-40.421053 0-56.589473 8.084211-8.084211 16.168421-10.778947 26.947368-10.778948s21.557895 5.389474 26.947369 10.778948c18.863158 16.168421 18.863158 43.115789 2.694737 56.589473z" fill="#101010" p-id="14730"></path></svg>
+                          </a>
+                    </li>
+                    
+            
+                    <slot name="extend-tools"></slot>
+            
+            
+                    <li style="margin-left: auto">
+                          <a href='javascript:;'
+                            onmousemove="showtip('<b>多屏全屏</b>')" 
+                            onmouseout=hidetip() 
+                            onclick=fullscreens()
+                            >
+                            <svg t="1679500143439" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="9820" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64"><path d="M674.414 394.644l253.292-252.418-0.868 143.044c-0.348 11.864 9.244 22.327 21.106 21.979h15.177c11.864-0.349 21.804-7.326 21.979-19.364l0.699-212.995c0-0.175 0.348-11.338 0.348-11.338 0.175-5.929-1.222-11.338-5.060-15.177-3.838-3.838-9.067-6.279-15.177-6.106l-10.816 0.175c-0.174 0-0.344 0-0.52 0.175l-211.252-0.875c-11.864 0.349-21.804 10.122-21.979 22.156v15.177c1.747 14.129 12.907 22.329 24.77 21.979l139.205 0.349-252.593 251.549c-11.514 11.514-11.514 30.177 0 41.689 11.514 11.688 30.18 11.688 41.693 0h-0.004zM355.18 632.585l-253.465 251.551 0.873-142.352c0.349-11.859-9.248-22.323-21.11-21.979h-16.046c-11.864 0.349-21.804 7.327-21.979 19.365l-0.699 213.17c0 0.175-0.348 11.338-0.348 11.338-0.175 5.936 1.222 11.338 5.055 15.177 3.838 3.838 9.073 6.279 15.177 6.106l10.815-0.175c0.175 0 0.349 0 0.525-0.175l212.125 0.874c11.859-0.349 21.804-10.117 21.979-22.156v-15.176c-1.746-14.129-12.91-22.329-24.775-21.979l-139.206-0.349 252.419-251.543c11.514-11.514 11.514-30.181 0-41.693-11.334-11.688-29.824-11.688-41.34 0.001v0zM985.799 952.339l-0.524-213.17c-0.349-11.865-10.122-19.016-21.98-19.365h-15.176c-11.865-0.344-21.283 10.122-21.111 21.979l0.874 143.049-253.466-252.247c-11.514-11.514-30.18-11.514-41.693 0-11.509 11.513-11.509 30.18 0 41.693l252.422 251.542-139.205 0.349c-11.864-0.349-22.852 8.024-24.774 21.979v15.177c0.348 11.864 10.122 21.804 21.979 22.156l211.253-0.874c0.174 0 0.348 0.175 0.524 0.175l10.816 0.175c5.928 0.174 11.338-2.093 15.176-6.106 3.838-3.838 5.232-9.243 5.056-15.177 0 0-0.175-11.164-0.175-11.338h0.005zM144.282 101.407l139.205-0.349c11.859 0.349 22.848-8.024 24.77-21.979v-15.179c-0.349-11.864-10.117-21.804-21.979-22.156l-212.296 0.874c-0.175 0-0.349-0.175-0.525-0.175l-10.814-0.175c-5.936-0.174-11.338 2.093-15.177 6.106-3.838 3.838-5.237 9.243-5.055 15.177 0 0 0.348 11.164 0.348 11.338l0.52 213.17c0.175 11.86 10.122 19.016 21.979 19.36h16.051c11.864 0.348 21.282-10.117 21.105-21.979l-0.698-142.346 253.296 251.725c11.508 11.514 30.176 11.514 41.688 0 11.514-11.514 11.514-30.18 0-41.693l-252.419-251.716zM144.282 101.407z" fill="#272636" p-id="9821"></path></svg>
+                          </a>
+                    </li>
+            
+                    <li>
+                          <a href='javascript:;'
+                            onmousemove="showtip('<b>全屏</b>')" 
+                            onmouseout=hidetip()
+                            onclick=fullscreen()
+                            > 
+                            <svg t="1679500177291" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="9973" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64"><path d="M909 959H780a30 30 0 0 1 0-60h99a20 20 0 0 0 20-20v-99a30 30 0 0 1 60 0v129a50 50 0 0 1-50 50z m20-685a30 30 0 0 1-30-30v-99a20 20 0 0 0-20-20h-99a30 30 0 0 1 0-60h129a50 50 0 0 1 50 50v129a30 30 0 0 1-30 30z m-157 28v420a50 50 0 0 1-50 50H302a50 50 0 0 1-50-50V302a50 50 0 0 1 50-50h420a50 50 0 0 1 50 50z m-60 30a20 20 0 0 0-20-20H332a20 20 0 0 0-20 20v360a20 20 0 0 0 20 20h360a20 20 0 0 0 20-20V332zM244 125h-99a20 20 0 0 0-20 20v99a30 30 0 0 1-60 0V115a50 50 0 0 1 50-50h129a30 30 0 0 1 0 60zM95 750a30 30 0 0 1 30 30v99a20 20 0 0 0 20 20h99a30 30 0 0 1 0 60H115a50 50 0 0 1-50-50V780a30 30 0 0 1 30-30z" fill="#333333" p-id="9974"></path></svg>
+                          </a>
+                    </li>       
+
+                    <li class="pc-only">
+                        <a href='javascript:;' 
+                        onmousemove="showtip('<b>64分屏</b>')" 
+                        onmouseout=hidetip() 
+                        onclick="splitScreen(64)">
+                            <svg t="1679499662881" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6269" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64"><path d="M894.44 118.63H129.56C93.35 118.63 64 147.98 64 184.2v655.6c0 36.21 29.35 65.56 65.56 65.56h764.88c36.21 0 65.56-29.36 65.56-65.56V184.2c0-36.22-29.36-65.57-65.56-65.57zM278.17 752.39h126.75v87.41H278.17v-87.41zM107.71 227.9h126.75v87.41H107.71V227.9z m340.92 524.49h126.75v87.41H448.63v-87.41z m-43.71-305.95H278.17v-87.41h126.75v87.41z m43.71-87.42h126.75v87.41H448.63v-87.41z m-43.71 131.13v87.41H278.17v-87.41h126.75z m43.71 0h126.75v87.41H448.63v-87.41z m126.75 131.12v87.41H448.63v-87.41h126.75z m43.7 131.12h126.75v87.41H619.08v-87.41z m0-43.71v-87.41h126.75v87.41H619.08z m0-131.12v-87.41h126.75v87.41H619.08z m0-131.12v-87.41h126.75v87.41H619.08z m0-131.12V227.9h126.75v87.41H619.08z m-43.7 0H448.63V227.9h126.75v87.42z m-170.46 0H278.17V227.9h126.75v87.42z m-297.21 43.7h126.75v87.41H107.71v-87.41z m0 131.13h126.75v87.41H107.71v-87.41z m0 131.12h126.75v87.41H107.71v-87.41z m170.46 0h126.75v87.41H278.17v-87.41zM789.54 839.8v-87.41h126.75v87.41H789.54z m126.75-131.12H789.54v-87.41h126.75v87.41z m0-131.12H789.54v-87.41h126.75v87.41z m0-131.12H789.54v-87.41h126.75v87.41z m0-131.12H789.54V227.9h126.75v87.42zM107.71 752.39h126.75v87.41H107.7v-87.41z" p-id="6270"></path></svg>
+                          </a>
+                    </li>    
+            
+                    <li class="pc-only">
+                        <a href='javascript:;' 
+                        onmousemove="showtip('<b>25分屏</b>')" 
+                        onmouseout=hidetip() 
+                        onclick="splitScreen(25)">
+                            <svg t="1679499662881" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6269" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64"><path d="M894.44 118.63H129.56C93.35 118.63 64 147.98 64 184.2v655.6c0 36.21 29.35 65.56 65.56 65.56h764.88c36.21 0 65.56-29.36 65.56-65.56V184.2c0-36.22-29.36-65.57-65.56-65.57zM278.17 752.39h126.75v87.41H278.17v-87.41zM107.71 227.9h126.75v87.41H107.71V227.9z m340.92 524.49h126.75v87.41H448.63v-87.41z m-43.71-305.95H278.17v-87.41h126.75v87.41z m43.71-87.42h126.75v87.41H448.63v-87.41z m-43.71 131.13v87.41H278.17v-87.41h126.75z m43.71 0h126.75v87.41H448.63v-87.41z m126.75 131.12v87.41H448.63v-87.41h126.75z m43.7 131.12h126.75v87.41H619.08v-87.41z m0-43.71v-87.41h126.75v87.41H619.08z m0-131.12v-87.41h126.75v87.41H619.08z m0-131.12v-87.41h126.75v87.41H619.08z m0-131.12V227.9h126.75v87.41H619.08z m-43.7 0H448.63V227.9h126.75v87.42z m-170.46 0H278.17V227.9h126.75v87.42z m-297.21 43.7h126.75v87.41H107.71v-87.41z m0 131.13h126.75v87.41H107.71v-87.41z m0 131.12h126.75v87.41H107.71v-87.41z m170.46 0h126.75v87.41H278.17v-87.41zM789.54 839.8v-87.41h126.75v87.41H789.54z m126.75-131.12H789.54v-87.41h126.75v87.41z m0-131.12H789.54v-87.41h126.75v87.41z m0-131.12H789.54v-87.41h126.75v87.41z m0-131.12H789.54V227.9h126.75v87.42zM107.71 752.39h126.75v87.41H107.7v-87.41z" p-id="6270"></path></svg>
+                          </a>
+                     </li>   
+
+                    <li class="pc-only">
+                            <a href='javascript:;' 
+                            onmousemove="showtip('<b>16分屏</b>')" 
+                            onmouseout=hidetip() 
+                            onclick="splitScreen(16)">
+                            <svg t="1679499438816" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6112" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64"><path d="M894.44 118.63H129.56C93.35 118.63 64 147.98 64 184.2v655.6c0 36.21 29.35 65.56 65.56 65.56h764.88c36.21 0 65.56-29.36 65.56-65.56V184.2c0-36.22-29.36-65.57-65.56-65.57zM277.07 839.8H107.71V719.6h169.37v120.2z m0-163.9H107.71V555.7h169.37v120.2z m0-163.9H107.71V391.8h169.37V512z m0-163.9H107.71V227.9h169.37v120.2z m213.08 491.7H320.78V719.6h169.37v120.2z m0-163.9H320.78V555.7h169.37v120.2z m0-163.9H320.78V391.8h169.37V512z m0-163.9H320.78V227.9h169.37v120.2z m213.07 491.7H533.85V719.6h169.37v120.2z m0-163.9H533.85V555.7h169.37v120.2z m0-163.9H533.85V391.8h169.37V512z m0-163.9H533.85V227.9h169.37v120.2z m213.07 491.7H746.93V719.6H916.3v120.2z m0-163.9H746.93V555.7H916.3v120.2z m0-163.9H746.93V391.8H916.3V512z m0-163.9H746.93V227.9H916.3v120.2z" p-id="6113"></path></svg>
+                            </a>
+                     </li>   
+
+                     <li class="pc-only">
+                     
+                           <a href='javascript:;' 
+                           onmousemove="showtip('<b>10分屏</b>')" 
+                           onmouseout=hidetip() 
+                           onclick="splitScreen(10)">
+                            <svg t="1679499706642" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6426" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64"><path d="M894.44 118.63H129.56C93.35 118.63 64 147.98 64 184.2v655.6c0 36.21 29.35 65.56 65.56 65.56h764.88c36.21 0 65.56-29.36 65.56-65.56V184.2c0-36.22-29.36-65.57-65.56-65.57zM107.71 227.9h638.13v480.78H107.71V227.9z m467.67 524.49v87.41H448.63v-87.41h126.75z m43.71 0h126.74v87.41H619.09v-87.41z m-214.17 0v87.41H278.17v-87.41h126.75z m384.62 87.41v-87.41h126.75v87.41H789.54z m126.75-131.12H789.54v-87.41h126.75v87.41z m0-131.12H789.54v-87.41h126.75v87.41z m0-131.12H789.54v-87.41h126.75v87.41z m0-131.12H789.54V227.9h126.75v87.42zM107.71 752.39h126.76v87.41H107.7v-87.41z" p-id="6427"></path></svg>
+                             </a>
+                     </li> 
+                    
+                    <li class="pc-only">
+                        <a href='javascript:;' 
+                        onmousemove="showtip('<b>9分屏</b>')" 
+                        onmouseout=hidetip() 
+                           onclick="splitScreen(9)">
+                           <svg t="1679499260353" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5643" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64"><path d="M894.44 118.63H129.56C93.35 118.63 64 147.99 64 184.2v677.47c0 24.14 19.57 43.71 43.71 43.71H916.3c24.14 0 43.7-19.57 43.7-43.7V184.2c0-36.21-29.35-65.57-65.56-65.57zM916.3 227.9v174.83H681.36V227.9H916.3zM397.26 621.27V446.44h240.39v174.83H397.26z m240.39 43.71V839.8H397.26V664.98h240.39z m-284.09-43.71H107.7V446.44h245.85v174.83z m43.7-218.54V227.9h240.39v174.83H397.26z m284.1 43.71H916.3v174.83H681.36V446.44zM353.56 227.9v174.83H107.7V227.9h245.86zM107.7 839.8V664.98h245.85V839.8H107.7z m573.66 0V664.98H916.3V839.8H681.36z" p-id="5644"></path></svg>
+                          </a>
+                    </li>   
+            
+                    <li class="pc-only">
+                           <a href='javascript:;' 
+                           onmousemove="showtip('<b>8分屏</b>')" 
+                           onmouseout=hidetip() 
+                            onclick="splitScreen(8)">
+                            <svg t="1679499416401" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5955" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64"><path d="M894.44 118.63H129.56C93.35 118.63 64 147.98 64 184.2v655.6c0 36.21 29.35 65.56 65.56 65.56h764.88c36.21 0 65.56-29.36 65.56-65.56V184.2c0-36.22-29.36-65.57-65.56-65.57zM277.07 839.8H107.71V719.6h169.37v120.2z m213.08 0H320.78V719.6h169.37v120.2z m213.07 0H533.85V719.6h169.37v120.2z m0-491.7v327.81H107.71V227.9h595.53v120.2z m213.07 491.7H746.93V719.6H916.3v120.2z m0-163.9H746.93V555.7H916.3v120.2z m0-163.9H746.93V391.8H916.3V512z m0-163.9H746.93V227.9H916.3v120.2z" p-id="5956"></path></svg>
+                            </a>
+                     </li> 
+                    <li>
+                        <a href='javascript:;'
+                            onmousemove="showtip('<b>6分屏</b>')" 
+                            onmouseout=hidetip() 
+                            onclick="splitScreen(6)">
+                            <svg t="1679499246390" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5486" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64"><path d="M894.44 118.63H129.56C93.35 118.63 64 147.98 64 184.2v677.46c0 24.14 19.57 43.71 43.7 43.71h808.6c24.14 0 43.7-19.56 43.7-43.7V184.2c0-36.22-29.35-65.57-65.56-65.57zM353.56 839.8H107.7V664.98h245.85V839.8z m284.09 0H397.26V664.98h240.39V839.8z m0-437.07h-0.16v43.71h0.16v174.83H107.7V227.9H637.65v174.83zM916.3 839.8H681.36V664.98H916.3V839.8z m0-218.53H681.36V446.44H916.3v174.83z m0-218.54H681.36V227.9H916.3v174.83z" p-id="5487"></path></svg>
+                          </a>
+                    </li>   
+            
+                    <li>
+                        <a href='javascript:;' 
+                            onmousemove="showtip('<b>4分屏</b>')" 
+                            onmouseout=hidetip()
+                            onclick="splitScreen(4)">
+                            <svg t="1679498832987" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5329" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64"><path d="M894.44 118.63H129.56C93.35 118.63 64 147.99 64 184.2v655.6c0 36.21 29.35 65.56 65.56 65.56H894.45c36.21 0 65.56-29.35 65.56-65.56V184.2c-0.01-36.21-29.36-65.57-65.57-65.57zM107.71 227.9h382.44V512H107.71V227.9z m0 611.9V555.7h382.44v284.1H107.71z m808.58 0H533.85V555.7h382.44v284.1z m0-327.8H533.85V227.9h382.44V512z" p-id="5330"></path></svg>
+                        </a>
+                    </li>   
+            
+                    <li>
+                       
+                          <a href='javascript:;' 
+                          onmousemove="showtip('<b>1分屏</b>')" 
+                          onmouseout=hidetip() 
+                          onclick="splitScreen(1)">
+                             <svg t="1679499377116" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5800" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64"><path d="M894.44 118.63H129.56C93.35 118.63 64 147.99 64 184.2v655.6c0 36.21 29.35 65.56 65.56 65.56h764.88c36.21 0 65.56-29.35 65.56-65.56V184.2c0-36.21-29.35-65.57-65.56-65.57z m21.85 721.17H107.71V227.9H916.3v611.9z" p-id="5801"></path></svg>
+                          </a>
+                    </li>   
+            
+                
+                  </ul>            
+        </div>
+
+
+        <!-- 
+        <div>
+            <div class="container" id="container1"></div>
+            <div class="container" id="container2"></div>
+        </div>
+        <div>
+            <div class="container" id="container3"></div>
+            <div class="container" id="container4"></div>
+        </div>
+
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl1"
+                value="http://flv.bdplay.nodemedia.cn/live/bbb.flv"
+            />
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl2"
+                value="http://flv.bdplay.nodemedia.cn/live/bbb_264.flv"
+            />
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl3"
+                value="http://flv.bdplay.nodemedia.cn/live/bbb.flv"
+            />
+        </div>
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                autocomplete="on"
+                id="playUrl4"
+                value="http://flv.bdplay.nodemedia.cn/live/bbb_264.flv"
+            />
+        </div>
+        <div class="input">
+            <button id="play">播放</button>
+            <button id="pause" style="display: none">停止</button>
+        </div>
+        <div class="input" style="line-height: 30px">
+            <button id="destroy">销毁</button>
+        </div>
+        -->
+    </div>
+</div>
+
+<script>
+// JavaScript Document
+document.write("<div id='tip' style='position:absolute; z-index:1; background-color: #ffffff; border: 1px solid gray; overflow: visible;visibility: hidden;font-size:12px;padding:12px;color:#333333'></div>")
+function showtip(w){
+
+ //   console.log(event);
+ var x=event.x;
+ var y=event.y;
+ tip.innerHTML=w;
+ tip.style.visibility="visible";
+
+ tip.style.width=parseInt(w.length*12/2);
+ tip.style.height=24;
+ tip.style.left=x+10+"px";
+ tip.style.top=(y+document.body.scrollTop+10)+"px";
+ //tip.style.pixelTop=y+document.body.scrollTop+10;
+// tip.style.pixelTop=y+10+"px";
+}
+function hidetip(){
+ tip.style.innerHTML=""
+ tip.style.visibility="hidden";
+}
+
+</script>
+
+<script>
+    window.activeIndex = 1;
+    window.maxScreenNum = 64;
+    window.splitScreenNum = 0;
+
+    onload = function () {
+        console.log("script onload");
+    }
+
+    console.log("script init");
+    createScreensDom(window.maxScreenNum);
+    splitScreen(1)
+
+    function createScreensDom(num){
+        console.log(num);
+
+        let htm = '';
+
+        for(let i =1;i<=num;i++){
+            htm += '<div class="video-item splitNum video-item-'+i+'" id="containerBoxId'+i+'">'
+            htm += '    <div class="container" onclick="videoItemClick('+i+')" id="container'+i+'">'+i+'</div>'
+            htm += '</div>'
+        }
+        //嵌入HTML方法
+	    document.getElementById("videoListBoxId").innerHTML = htm;
+       // document.getElementById("videoListBoxId").className = "video-list video-split-"+num;
+    }
+
+    function splitScreen(num){
+
+        for(let i =1;i<=num;i++){
+            var el = document.getElementById('containerBoxId'+i);
+            el.classList.remove("hide");
+        }
+        for(let i =num+1;i<=window.maxScreenNum;i++){
+            var el = document.getElementById('containerBoxId'+i);
+            el.classList.add("hide");
+           // console.log("hide:" +i);
+            try{
+                if(window.jessiplayers[i]){
+                    console.log("destroy:" +i);
+                    console.log(window.jessiplayers[i]);
+                    window.jessiplayers[i].destroy();
+                }
+                    
+                window.jessiplayers[i] = null;
+            }catch(e){
+                console.log(e);
+            }
+           
+        }
+
+        document.getElementById("videoListBoxId").className = "video-list video-split-"+num;
+        window.splitScreenNum = num;
+    }
+
+    //全屏
+    function launchIntoFullscreen(el) {
+        var rfs = el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen || el.msRequestFullScreen,
+        wscript;
+
+        if(typeof rfs != "undefined" && rfs) {
+            rfs.call(el);
+            return;
+        }
+
+        if(typeof window.ActiveXObject != "undefined") {
+            wscript = new ActiveXObject("WScript.Shell");
+            if(wscript) {
+                wscript.SendKeys("{F11}");
+            }
+        }
+    }
+
+    //退出全屏
+    function exitFullscreen(el) {
+        var el= document,
+        cfs = el.cancelFullScreen || el.webkitCancelFullScreen || el.mozCancelFullScreen || el.exitFullScreen,
+        wscript;
+
+        if (typeof cfs != "undefined" && cfs) {
+            cfs.call(el);
+            return;
+        }
+
+        if (typeof window.ActiveXObject != "undefined") {
+            wscript = new ActiveXObject("WScript.Shell");
+            if (wscript != null) {
+                wscript.SendKeys("{F11}");
+            }
+        }
+    }
+
+    function fullscreens(){
+       //全屏
+       var full = document.getElementById('videoListBoxId')
+       this.launchIntoFullscreen(full)
+    }
+    function fullscreen(){
+        
+       var full = document.getElementById('container'+window.activeIndex)
+       this.launchIntoFullscreen(full)
+    }
+
+    function videoItemClick(idx){
+        window.activeIndex = idx;
+        console.log(window.activeIndex);
+
+       
+        // var els = document.getElementsByClassName('video-item');
+
+        // els.forEach(el => {
+        //     el.classList.remove("active");
+        // });
+        
+        var cel = document.getElementsByClassName('active');
+        if(cel.length !=0){
+            cel[0].classList.remove("active");
+        }
+
+        var el = document.getElementById('containerBoxId'+idx);
+        el.classList.add("active");
+
+
+        if(window.updateRecordStatus){
+            var playerId = window.activeIndex;
+            if(window.jessiplayers[playerId] && window.jessiplayers[playerId].isRecording()){
+                window.updateRecordStatus(true)
+            }else{
+                window.updateRecordStatus(false)
+            }
+        }
+
+    }
+
+</script>
+
+<script>
+
+    window.jessiplayers = [];
+
+    api_get=function(url,callback){
+
+        function isLocalDiskURL() {
+            const url = window.location.href;
+            return url.startsWith('file://');
+        }
+
+        if (isLocalDiskURL()){
+            url = "http://127.0.0.1:8450" + url
+        }
+
+        // 1.创建 XMLHttpRequest 对象
+        var xhr = new XMLHttpRequest();
+        // 2.调用open函数，指定请求方式与URL地址
+        xhr.open('GET', url);
+        // 3.调用send函数，发起Ajax请求
+        xhr.send();
+        // 4.监听 onreadystatechange 事件
+        xhr.onreadystatechange = function () {
+            // 4.1监听xhr对象的请求状态readyState与服务器响应的状态status
+            if(xhr.readyState === 4) {  // if里面的判断条件是固定写法
+                //xhr.status === 200 sucess
+                // 4.2打印服务器响应回来的数据
+                let rsp=null
+                try{
+                    rsp= JSON.parse(xhr.responseText);
+                    console.log(xhr.responseText);
+                }catch(e){
+                    console.log(e);
+                }
+                callback(xhr.status,rsp)
+               
+            }else{
+                //
+                //let rsp= JSON.parse(xhr.responseText);
+                //callback(xhr.status,rsp)
+            }
+
+
+            // XHR.readyState == 状态（0，1，2，3，4），而且状态也是不可逆的：
+            // 0：请求未初始化，还没有调用 open()。
+            // 1：请求已经建立，但是还没有发送，还没有调用 send()。
+            // 2：请求已发送，正在处理中（通常现在可以从响应中获取内容头）。
+            // 3：请求在处理中；通常响应中已有部分数据可用了，没有全部完成。
+            // 4：响应已完成；您可以获取并使用服务器的响应了。
+
+
+
+        }
+    }
+
+    function streamItemClick(StreamPath){
+        console.log(StreamPath);
+        if(g_cur_cid == "" || g_cur_cid == undefined){
+            //播放本级视频资源
+            // 方式3
+            var obj = document.getElementById("protocalSelectId"); //定位id
+            var index = obj.selectedIndex; // 选中索引
+            var text = obj.options[index].text; // 选中文本
+            var value = obj.options[index].value; // 选中值
+
+            console.log(value);
+
+            jessiplay(window.activeIndex,value,StreamPath);
+        }else{
+            //播放下级视频资源
+            //需要先请求下级平台推流，默认使用ws 推流
+            reqClientPushApi(g_cur_cid,StreamPath)
+        }
+
+     
+    }
+
+
+    function closeAll(){
+
+        //
+        for(var i=1;i<=window.splitScreenNum;i++){
+            if(window.jessiplayers[i]){
+                //关闭视频，释放底层资源
+                window.jessiplayers[i].destroy();
+                window.jessiplayers[i] = null;
+                //清理画布为黑色背景
+                //window.jessiplayers[playerId].jessibuca.clearView();
+            }
+        }
+    }
+
+    function closeCurCell(){
+        var playerId = window.activeIndex;
+        if(window.jessiplayers[playerId]){
+            //关闭视频，释放底层资源
+            window.jessiplayers[playerId].destroy();
+            window.jessiplayers[playerId] = null;
+            //清理画布为黑色背景
+            //window.jessiplayers[playerId].jessibuca.clearView();
+        }
+    }
+
+
+    window.updateRecordStatus = function(isRecording){
+        var el = document.getElementById('recordCcontrolBtnId');
+
+        if(isRecording){
+            el.classList.add("recording");
+            el.classList.remove("unrecording");
+        }else{
+            el.classList.add("unrecording");
+            el.classList.remove("recording");
+        }
+    }
+
+    function recordCcontrol(){
+        var playerId = window.activeIndex;
+        if(window.jessiplayers[playerId]){
+
+            if(window.jessiplayers[playerId].isRecording()){
+                //暂停录制并下载。
+                window.jessiplayers[playerId].stopRecordAndSave();
+                window.updateRecordStatus(false)
+            }else{
+                // 用法： 开始录制。
+
+                // fileName: 可选，默认时间戳
+                // fileType: 可选，默认webm，支持webm 和mp4 格式
+
+                let name = new Date().getTime() ;
+                let fileType = "mp4";
+                window.jessiplayers[playerId].startRecord(name,fileType);
+                window.updateRecordStatus(true)
+            }
+        }
+
+    }
+
+    function screenshot(){
+        var playerId = window.activeIndex;
+        if(window.jessiplayers[playerId]){
+            let name = new Date().getTime() ;
+            let format = "jpeg";
+
+            /*
+                screenshot(filename, format, quality,type)
+                截图，调用后弹出下载框保存截图
+                filename: 可选参数, 保存的文件名, 默认 时间戳
+                format : 可选参数, 截图的格式，可选png或jpeg或者webp ,默认 png
+                quality: 可选参数, 当格式是jpeg或者webp时，压缩质量，取值0 ~ 1 ,默认 0.92
+                type: 可选参数, 可选download或者base64或者blob，默认download
+            */
+            window.jessiplayers[playerId].screenshot(name,format);
+        }
+
+    }
+
+    function jessiplay(playerId,protocol,StreamPath){
+        var $container = document.getElementById('container' + playerId);
+        var showOperateBtns = true; // 是否显示按钮
+        var forceNoOffscreen = true; //
+
+
+        if(!window.jessiplayers[playerId]){
+            // window.jessiplayers[playerId] = new JessibucaPro({
+            //         container: $container,
+            //         decoder: './decoder-pro.js',
+            window.jessiplayers[playerId] = new JessibucaPro({
+                    container: $container,
+                    decoder: './decoder-pro.js',
+                    videoBuffer: 0.2, // 缓存时长
+                    isResize: false,
+                    text: "",
+                    loadingText: "加载中",
+                    debug: false,
+                    hasAudio:true,
+                    useVideoRender:true,
+                    controlAutoHide:true,
+                    showBandwidth: showOperateBtns, // 显示网速
+                    showPerformance: false,
+                    operateBtns: {
+                        fullscreen: showOperateBtns,
+                        screenshot: showOperateBtns,
+                        play: showOperateBtns,
+                        audio: showOperateBtns,
+                        ptz: showOperateBtns,
+                        performance: showOperateBtns,
+                    },
+                    watermarkConfig: {
+                        text:{
+                            content:'jessibuca'
+                        },
+                        right: 10,
+                        top: 10
+                    },
+                },);
+
+                // jessibuca.onLog = msg => console.error(msg);
+                // jessibuca.onRecord = (status) => console.log('onRecord', status);
+                // jessibuca.onPause = () => console.log('onPause');
+                // jessibuca.onPlay = () => console.log('onPlay');
+                // jessibuca.onMute = msg => console.log('onMute', msg);
+                window.jessiplayers[playerId].on("fullscreen", function (flag) {
+                    console.log('is fullscreen', id, flag)
+                })
+        }
+        /*
+        WS-RAW 
+        地址格式：ws://[HOST]/jessica/[streamPath]
+        WS-FLV
+        地址格式：ws://[HOST]/jessica/[streamPath].flv
+        */
+
+        var host = "127.0.0.1:8450"
+
+        const origUrl = window.location.href;
+        if (!origUrl.startsWith('file://')){
+            host = window.location.host
+        }
+
+        var url = "";
+        if(protocol === "http-flv"){
+            if (window.location.protocol === 'https:') {
+                url = "https://" + host+"/hdl/" + StreamPath +".flv";
+            }else{
+                url = "http://" + host+"/hdl/" + StreamPath +".flv";
+            }
+        }else if(protocol === "hls"){
+            if (window.location.protocol === 'https:') {
+                url = "https://" + host+"/hls/" + StreamPath +".m3u8";
+            }else{
+                url = "http://" + host+"/hls/" + StreamPath +".m3u8";
+            }
+        }else if(protocol === "wss"){
+            if (window.location.protocol === 'https:') {
+                url = "wss://" + host+"/jessica/" + StreamPath +".flv";
+            }else{
+                url = "ws://" + host+"/jessica/" + StreamPath +".flv";
+            }
+        }else if(protocol === "webTransport"){
+           // 
+           if (window.location.protocol === 'https:') {
+                url = "wss://" + host+"/play/" + StreamPath;
+            }else{
+                url = "ws://" + host+"/play/" + StreamPath;
+            }
+        }else if(protocol === "webrtc"){
+           if (window.location.protocol === 'https:') {
+                url = "wss://" + host+"/webrtc/play/" + StreamPath;
+            }else{
+                url = "ws://" + host+"/webrtc/play/" + StreamPath;
+            }
+        }else{
+            if (window.location.protocol === 'https:') {
+                url = "wss://" + host+"/jessica/" + StreamPath +".flv";
+            }else{
+                url = "ws://" + host+"/jessica/" + StreamPath +".flv";
+            }
+        }
+        console.log(url);
+        window.jessiplayers[playerId].play(url).then(() => {
+
+        }).catch((e) => {
+            console.error(e);
+        });
+
+
+    }
+
+   var g_cur_cid = "";
+
+    //
+    var getStreamListApi = function(cid){
+        var streamlisturl = "/erwscascade/api/streamlist"
+
+        if (cid != undefined && cid != ""){
+            streamlisturl += "?cid=" +cid
+        }
+
+        api_get(streamlisturl,function(status,rsp){
+            console.log(status);
+            console.log(rsp);
+            var htm = '';
+           // htm += '<ul>';
+            rsp.forEach( stream => {
+            
+                htm += '<li class="stream-item">';
+                
+                htm +='<a ';
+                htm +='onclick="streamItemClick(\'' + stream.StreamPath + '\')"';
+
+                htm +='>';
+                htm +='<span>';
+                    htm +=stream.Source + '   '  + stream.StreamPath;
+                htm +='</span>';
+                htm +='</a>';
+                htm += '</li>'
+
+            });
+          //  htm += '</ul>';
+            document.getElementById("streamlistId").innerHTML = htm;
+        });
+    }
+
+    var getClinetListApi = function(){
+        var url = "/erwscascade/api/clientlist"
+
+        api_get(url,function(status,rsp){
+            console.log(status);
+            console.log(rsp);
+            var htm = '';
+
+            htm += '<li class="client-item">';
+            htm += '<a onclick="clientItemClick()" >';
+                htm +='<span>';
+                    htm += '本级';
+                htm +='</span>';
+            htm += '</a>';
+            htm += '</li>'
+
+            rsp.forEach( client => {
+                
+                htm += '<li class="client-item">';
+                
+                htm +='<a ';
+                htm +='onclick="clientItemClick(\'' + client.cid + '\')"';
+
+                htm +='>';
+                htm +='<span>';
+                    htm +=client.name + '/'  + client.cid;
+                htm +='</span>';
+                htm +='</a>';
+                htm += '</li>'
+
+            });
+            document.getElementById("clientlistId").innerHTML = htm;
+        });
+    }
+
+
+    //http://127.0.0.1:8450/erwscascade/httpproxy/?cid=test-c001&httpPath=/erwscascade/api/push?streamPath=njtv/glgc&target=ws://127.0.0.1:8450/erwscascade/wspush/on
+    var reqClientPushApi = function(cid,streamPath){
+        var url = "/erwscascade/httpproxy/"
+
+        url += "?cid=" + cid
+        url += "&httpPath=/erwscascade/api/push?streamPath=" + streamPath
+       
+        const origUrl = window.location.href;
+        if (origUrl.startsWith('https://')) {
+            url += "&target=" + "wss://" + window.location.host + "/erwscascade/wspush/" + streamPath
+        }else if (origUrl.startsWith('http://')){
+            url += "&target=" + "ws://" + window.location.host + "/erwscascade/wspush/" + streamPath
+        }else if (origUrl.startsWith('file://')){
+            url += "&target=" + "ws://127.0.0.1:8450/erwscascade/wspush/" + streamPath
+        }
+        //target=ws://127.0.0.1:8450/erwscascade/wspush/on
+        api_get(url,function(status,rsp){
+            console.log(status);
+            console.log(rsp);
+
+            var obj = document.getElementById("protocalSelectId"); //定位id
+            var index = obj.selectedIndex; // 选中索引
+            var text = obj.options[index].text; // 选中文本
+            var value = obj.options[index].value; // 选中值
+            console.log(value);
+
+            jessiplay(window.activeIndex,value,streamPath+"-"+cid);
+
+        });
+    }
+
+    function clientItemClick(cid){
+        g_cur_cid = cid!= undefined? cid : "";
+        document.getElementById("streamlistName").innerHTML = (cid!= undefined? "下级:"+cid : "本级") + "流列表";
+        document.getElementById("streamlistId").innerHTML = "空";
+
+        getStreamListApi(cid);
+    }
+
+    function getStreamListBtnFunc(){
+        getClinetListApi();
+        getStreamListApi();
+    }
+
+   
+
+    getClinetListApi();
+    getStreamListApi();
+</script>
+
+
+<script>
+    /*
+    var $player = document.getElementById('play');
+    var $pause = document.getElementById('pause');
+    var $destroy = document.getElementById('destroy');
+
+
+    var showOperateBtns = true; // 是否显示按钮
+    var forceNoOffscreen = true; //
+    var playList = [];
+
+    function create(id) {
+        var $container = document.getElementById('container' + id);
+
+        var jessibuca = new JessibucaPro({
+            container: $container,
+            decoder: './decoder-pro.js',
+            videoBuffer: 0.2, // 缓存时长
+            isResize: false,
+            text: "",
+            loadingText: "加载中",
+            debug: false,
+            hasAudio:false,
+            useVideoRender:true,
+            controlAutoHide:true,
+            showBandwidth: showOperateBtns, // 显示网速
+            showPerformance:showOperateBtns,
+            operateBtns: {
+                fullscreen: showOperateBtns,
+                screenshot: showOperateBtns,
+                play: showOperateBtns,
+                audio: showOperateBtns,
+            },
+            watermarkConfig: {
+                text:{
+                    content:'jessibuca-pro'
+                },
+                right: 10,
+                top: 10
+            },
+        },);
+
+        // jessibuca.onLog = msg => console.error(msg);
+        // jessibuca.onRecord = (status) => console.log('onRecord', status);
+        // jessibuca.onPause = () => console.log('onPause');
+        // jessibuca.onPlay = () => console.log('onPlay');
+        // jessibuca.onMute = msg => console.log('onMute', msg);
+        jessibuca.on("fullscreen", function (flag) {
+            console.log('is fullscreen', id, flag)
+        })
+        playList.push(jessibuca);
+    }
+
+
+    for (let i = 0; i < 4; i++) {
+        create(i + 1);
+        $player.style.display = 'inline-block';
+        $pause.style.display = 'none';
+        $destroy.style.display = 'none';
+    }
+
+    $player.addEventListener('click', function () {
+        for (let i = 0; i < 4; i++) {
+            var id = i + 1;
+            var $playHref = document.getElementById('playUrl' + id);
+            let player = playList[i];
+            if ($playHref.value) {
+                setTimeout((url) => {
+                    console.log(url);
+                    player && player.play(url).then(() => {
+
+                    }).catch((e) => {
+                        console.error(e);
+                    });
+                }, 0, $playHref.value)
+            }
+        }
+
+        $player.style.display = 'none';
+        $pause.style.display = 'inline-block';
+        $destroy.style.display = 'inline-block';
+    }, false)
+
+
+    $pause.addEventListener('click', function () {
+        $player.style.display = 'inline-block';
+        $pause.style.display = 'none';
+        for (let i = 0; i < 4; i++) {
+            let player = playList[i];
+            player && player.pause()
+        }
+    })
+
+    $destroy.addEventListener('click', function () {
+        for (let i = 0; i < 4; i++) {
+            let player = playList[i];
+            player && player.destroy()
+        }
+        playList = [];
+        setTimeout(() => {
+            for (let i = 0; i < 4; i++) {
+                create(i + 1);
+            }
+            $player.style.display = 'inline-block';
+            $pause.style.display = 'none';
+            $destroy.style.display = 'none';
+        }, 100)
+    })
+    */
+</script>
+
+</body>
+</html>

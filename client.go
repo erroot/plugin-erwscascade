@@ -24,6 +24,7 @@ var wsclients = make(map[string]*CascadingWsClient)
 var cSn int = 0
 
 type CascadingWsClient struct {
+	CInfo     ClientInfo
 	URL       string
 	Conn      net.Conn
 	IsClosed  bool
@@ -61,13 +62,9 @@ type CascadingWsMessage struct {
 	Pad  []byte      `json:"pad"`
 }
 
-type ClientInfo struct {
-	Name   string `json:"name"`
-	Serial string `json:"serial"`
-}
-
-func NewCascadingWsClient(url string) *CascadingWsClient {
+func NewCascadingWsClient(cinfo ClientInfo, url string) *CascadingWsClient {
 	return &CascadingWsClient{
+		CInfo:     cinfo,
 		URL:       url,
 		IsClosed:  true,
 		IsRecving: false,
@@ -104,11 +101,7 @@ func (c *CascadingWsClient) Close() {
 	c.IsClosed = true
 }
 func (c *CascadingWsClient) SendClientInfo() error {
-	clientInfo := ClientInfo{
-		Name:   "html 客户端",
-		Serial: "SNVR-01029-003932-1330",
-	}
-	infoBytes, _ := json.Marshal(clientInfo)
+	infoBytes, _ := json.Marshal(c.CInfo)
 	cSn++
 	msg := CascadingWsMessage{
 		Sn:   cSn,
@@ -280,7 +273,7 @@ func (c *CascadingWsClient) receiveWsMessages() {
 }
 
 func (p *ErWsCascadeConfig) onClientSetup() {
-	cid := p.Cid
+	cid := p.CInfo.Cid
 	if cid == "" {
 		// 创建一个新的UUID
 		newUUID, err := uuid.NewRandom()
@@ -310,7 +303,7 @@ func (p *ErWsCascadeConfig) onClientSetup() {
 				Host:   host,
 				Path:   s.ConextPath + "/erwscascade/wsocket/register?cid=" + cid,
 			}
-			client := NewCascadingWsClient(u.String())
+			client := NewCascadingWsClient(p.CInfo, u.String())
 			wsclients[fmt.Sprintf("%d", idx)] = client
 		}
 		// 保持连接

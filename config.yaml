@@ -1,0 +1,17 @@
+# 级联平台配置，如果没有上级平台可以不配置
+erwscascade:
+  #enable: false
+  cinfo: 
+    cid: "test-c001"
+    name: "pc-test"
+    serial: "c001"
+  server:
+    -
+      protocol: "ws"
+      host: "127.0.0.1"
+      port: 8450
+      conextpath: ""
+  push:
+    repush: -1
+    pushlist:
+      #njtv/glgc: ws://127.0.0.1:8450/erwscascade/wspush/on

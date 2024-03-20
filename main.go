@@ -2,7 +2,6 @@ package erwscascade
 
 import (
 	"embed"
-	"fmt"
 	"io/ioutil"
 	"mime"
 	"net/http"
@@ -28,9 +27,15 @@ type ServerConfig struct {
 	ConextPath string `default:"" desc:"上级平台根目录" yaml:"conextpath"`
 }
 
+type ClientInfo struct {
+	Cid    string `default:"" desc:"上级平台端口" yaml:"cid" json:"cid"`
+	Name   string `default:"" desc:"上级平台端口" yaml:"name" json:"name"`
+	Serial string `default:"" desc:"上级平台端口" yaml:"serial" json:"serial"`
+}
+
 type ErWsCascadeConfig struct {
 	DefaultYaml
-	Cid string `default:"" desc:"客户端ID" yaml:"cid"`
+	CInfo ClientInfo `desc:"客户端信息"  yaml:"cinfo"`
 	//erwscascade/wsocket/register
 	ServerConfig []ServerConfig `yaml:"server"`
 	config.Publish
@@ -60,19 +65,6 @@ func (p *ErWsCascadeConfig) OnEvent(event any) {
 }
 
 var ErWsCascadePlugin = InstallPlugin(&ErWsCascadeConfig{})
-
-func (p *ErWsCascadeConfig) Ui_(w http.ResponseWriter, r *http.Request) {
-	ss := strings.Split(r.URL.Path, "/")
-	if b, err := f.ReadFile("ui/" + ss[len(ss)-1]); err == nil {
-		w.Header().Set("Content-Type", mime.TypeByExtension(filepath.Ext(ss[len(ss)-1])))
-		w.Write(b)
-	} else {
-		//w.Header().Set("Cross-Origin-Opener-Policy", "same-origin")
-		//w.Header().Set("Cross-Origin-Embedder-Policy", "require-corp")
-		b, err = f.ReadFile("ui/index.html")
-		w.Write(b)
-	}
-}
 
 // http 接口向上级平台推流
 func (p *ErWsCascadeConfig) API_Push(rw http.ResponseWriter, r *http.Request) {
@@ -140,7 +132,6 @@ func (p *ErWsCascadeConfig) HttpProxy_(w http.ResponseWriter, r *http.Request) {
 		util.ReturnError(util.APIErrorQueryParse, "QueryUnescape faild", w, r)
 		return
 	}
-
 	req := ProxyMessage{
 		Url:    decodedStr, //url 解码
 		Method: r.Method,
@@ -163,7 +154,7 @@ func (p *ErWsCascadeConfig) HttpProxy_(w http.ResponseWriter, r *http.Request) {
 		// 读取 Body 的内容
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			fmt.Printf("Error reading request body: %v\n", err)
+			ErWsCascadePlugin.Error("Error reading request body", zap.Error(err))
 			return
 		}
 		req.Body = body
@@ -171,7 +162,7 @@ func (p *ErWsCascadeConfig) HttpProxy_(w http.ResponseWriter, r *http.Request) {
 	//ws send msg
 	rsp, err := p.transWsProxyMessage(cid, req)
 	if err != nil {
-		fmt.Printf("WsProxy faild: %v\n", err)
+		ErWsCascadePlugin.Error("WsProxy faild", zap.Error(err))
 		return
 	}
 	// 将读取的 Body 内容作为响应返回给客户端
@@ -218,130 +209,149 @@ func (p *ErWsCascadeConfig) HttpProxy_(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-   func (p *ErWsCascadeConfig) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-   	var conn net.Conn
-   	var err error
-   	//下级平台 ws接入链接
-   	if r.Header.Get("Upgrade") == "websocket" {
-   		// 判断 URL 中是否包含 "register" 关键字
-   		if matched, _ := regexp.MatchString("/register", r.URL.Path); matched {
-   			// 获取 cid 参数
-   			cid := r.URL.Query().Get("cid")
-
-   			fmt.Printf("register in client id %s\n", cid)
-
-   			conn, _, _, err = ws.UpgradeHTTP(r, w)
-   			if err != nil {
-   				fmt.Printf("UpgradeHTTP error:%v", err)
-   				return
-   			}
-
-   			connectionsLock.Lock()
-   			connections[cid] = &conn
-   			connectionsThreads[cid] = make(chan struct{})
-   			connectionsLock.Unlock()
-
-   			// 启动线程接收客户端消息
-   			go p.receiveWsMessages(&conn, cid)
-
-   		}
-   		return
-   	}
-
-   	if r.URL.Path == "/erwscascade/" {
-   		var s string
-   		Streams.Range(func(streamPath string, _ *Stream) {
-   			s += fmt.Sprintf("<a href='%s'>%s</a><br>", streamPath, streamPath)
-   		})
-   		if s != "" {
-   			s = "<b>Live Streams</b><br>" + s
-   		}
-   		for name, p := range Plugins {
-   			if pullcfg, ok := p.Config.(config.PullConfig); ok {
-   				if pullonsub := pullcfg.GetPullConfig().PullOnSub; pullonsub != nil {
-   					s += fmt.Sprintf("<b>%s pull stream on subscribe</b><br>", name)
-   					for streamPath, url := range pullonsub {
-   						s += fmt.Sprintf("<a href='%s'>%s</a> <-- %s<br>", streamPath, streamPath, url)
-   					}
-   				}
-   			}
-   		}
-   		w.Write([]byte(s))
-   		return
-   	}
-   	ss := strings.Split(r.URL.Path, "/")
-   	if b, err := f.ReadFile("ui/" + ss[len(ss)-1]); err == nil {
-   		w.Header().Set("Content-Type", mime.TypeByExtension(filepath.Ext(ss[len(ss)-1])))
-   		w.Write(b)
-   	} else {
-   		//w.Header().Set("Cross-Origin-Opener-Policy", "same-origin")
-   		//w.Header().Set("Cross-Origin-Embedder-Policy", "require-corp")
-   		b, err = f.ReadFile("ui/index.html")
-   		w.Write(b)
-   	}
-   }
+	func (p *ErWsCascadeConfig) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/erwscascade/" {
+			var s string
+			Streams.Range(func(streamPath string, _ *Stream) {
+				s += fmt.Sprintf("<a href='%s'>%s</a><br>", streamPath, streamPath)
+			})
+			if s != "" {
+				s = "<b>Live Streams</b><br>" + s
+			}
+			for name, p := range Plugins {
+				if pullcfg, ok := p.Config.(config.PullConfig); ok {
+					if pullonsub := pullcfg.GetPullConfig().PullOnSub; pullonsub != nil {
+						s += fmt.Sprintf("<b>%s pull stream on subscribe</b><br>", name)
+						for streamPath, url := range pullonsub {
+							s += fmt.Sprintf("<a href='%s'>%s</a> <-- %s<br>", streamPath, streamPath, url)
+						}
+					}
+				}
+			}
+			w.Write([]byte(s))
+			return
+		}
+		ss := strings.Split(r.URL.Path, "/")
+		if b, err := f.ReadFile("ui/" + ss[len(ss)-1]); err == nil {
+			w.Header().Set("Content-Type", mime.TypeByExtension(filepath.Ext(ss[len(ss)-1])))
+			w.Write(b)
+		} else {
+			//w.Header().Set("Cross-Origin-Opener-Policy", "same-origin")
+			//w.Header().Set("Cross-Origin-Embedder-Policy", "require-corp")
+			b, err = f.ReadFile("ui/index.html")
+			w.Write(b)
+		}
+	}
 */
-/*
-   type CascadingStream struct {
-   	Source     string
-   	StreamPath string
-   }
 
-   func filterStreams() (ss []*CascadingStream) {
+func (p *ErWsCascadeConfig) Ui_(w http.ResponseWriter, r *http.Request) {
+	ss := strings.Split(r.URL.Path, "/")
+	if b, err := f.ReadFile("ui/" + ss[len(ss)-1]); err == nil {
+		w.Header().Set("Content-Type", mime.TypeByExtension(filepath.Ext(ss[len(ss)-1])))
+		w.Write(b)
+	} else {
+		//w.Header().Set("Cross-Origin-Opener-Policy", "same-origin")
+		//w.Header().Set("Cross-Origin-Embedder-Policy", "require-corp")
+		b, err = f.ReadFile("ui/index.html")
+		w.Write(b)
+	}
+}
 
-   	//优先获取配置文件中视频流
-   	for name, p := range Plugins {
-   		if pullcfg, ok := p.Config.(config.PullConfig); ok {
+type CascadingStream struct {
+	Source     string
+	StreamPath string
+}
 
-   			if pullonstart := pullcfg.GetPullConfig().PullOnStart; pullonstart != nil {
-   				//s += fmt.Sprintf("<b>%s pull stream on subscribe</b><br>", name)
-   				//for streamPath, url := range pullonsub {
-   				var sourcename string = name
-   				sourcename += "Pull"
+func filterStreams() (ss []*CascadingStream) {
 
-   				for streamPath := range pullonstart {
-   					ss = append(ss, &CascadingStream{sourcename, streamPath})
-   					//s += fmt.Sprintf("<a href='%s'>%s</a> <-- %s<br>", streamPath, streamPath, url)
-   				}
-   			}
+	//优先获取配置文件中视频流
+	for name, p := range Plugins {
+		if pullcfg, ok := p.Config.(config.PullConfig); ok {
 
-   			if pullonsub := pullcfg.GetPullConfig().PullOnSub; pullonsub != nil {
-   				//s += fmt.Sprintf("<b>%s pull stream on subscribe</b><br>", name)
-   				//for streamPath, url := range pullonsub {
-   				var sourcename string = name
+			if pullonstart := pullcfg.GetPullConfig().PullOnStart; pullonstart != nil {
+				//s += fmt.Sprintf("<b>%s pull stream on subscribe</b><br>", name)
+				//for streamPath, url := range pullonsub {
+				var sourcename string = name
+				sourcename += "Pull"
 
-   				sourcename += "Pull"
+				for streamPath := range pullonstart {
+					ss = append(ss, &CascadingStream{sourcename, streamPath})
+					//s += fmt.Sprintf("<a href='%s'>%s</a> <-- %s<br>", streamPath, streamPath, url)
+				}
+			}
 
-   				for streamPath := range pullonsub {
-   					ss = append(ss, &CascadingStream{sourcename, streamPath})
-   					//s += fmt.Sprintf("<a href='%s'>%s</a> <-- %s<br>", streamPath, streamPath, url)
-   				}
-   			}
-   		}
-   	}
+			if pullonsub := pullcfg.GetPullConfig().PullOnSub; pullonsub != nil {
+				//s += fmt.Sprintf("<b>%s pull stream on subscribe</b><br>", name)
+				//for streamPath, url := range pullonsub {
+				var sourcename string = name
 
-   	//过滤出动态添加的视频流
-   	//Streams.RLock()
-   	//defer Streams.RUnlock()
+				sourcename += "Pull"
 
-   	Streams.Range(func(streamPath string, s *Stream) {
-   		//s += fmt.Sprintf("<a href='%s'>%s</a><br>", streamPath, streamPath)
-   		var isrepeat bool = false
-   		for _, s := range ss {
-   			if streamPath == s.StreamPath {
-   				isrepeat = true
-   			}
-   		}
-   		if !isrepeat {
-   			ss = append(ss, &CascadingStream{"api", streamPath})
-   		}
-   	})
+				for streamPath := range pullonsub {
+					ss = append(ss, &CascadingStream{sourcename, streamPath})
+					//s += fmt.Sprintf("<a href='%s'>%s</a> <-- %s<br>", streamPath, streamPath, url)
+				}
+			}
+		}
+	}
 
-   	return
-   }
+	//过滤出动态添加的视频流
+	//Streams.RLock()
+	//defer Streams.RUnlock()
 
-   func (*ErWsCascadeConfig) API_streamslist(w http.ResponseWriter, r *http.Request) {
-   	util.ReturnFetchValue(filterStreams, w, r)
-   }
-*/
+	Streams.Range(func(streamPath string, s *Stream) {
+		//s += fmt.Sprintf("<a href='%s'>%s</a><br>", streamPath, streamPath)
+		var isrepeat bool = false
+		for _, s := range ss {
+			if streamPath == s.StreamPath {
+				isrepeat = true
+			}
+		}
+		if !isrepeat {
+			ss = append(ss, &CascadingStream{"api", streamPath})
+		}
+	})
+
+	return
+}
+
+// 客户端列表
+func (*ErWsCascadeConfig) API_clientlist(w http.ResponseWriter, r *http.Request) {
+	// 输出map对象内容
+	list := make([]ClientInfo, 0)
+
+	for _, value := range clientConnections {
+		//fmt.Println("Key:", key, "Value:", value)
+		list = append(list, value.CInfo)
+	}
+	util.ReturnValue(list, w, r)
+}
+
+func (p *ErWsCascadeConfig) API_streamlist(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	cid := query.Get("cid")
+
+	// 本级流资源列表
+	if cid == "" {
+		util.ReturnFetchValue(filterStreams, w, r)
+		return
+	}
+
+	// 下级平台流列表
+	req := ProxyMessage{
+		Url:    "/erwscascade/api/streamlist", //url 解码
+		Method: "GET",
+	}
+
+	//ws send msg
+	rsp, err := p.transWsProxyMessage(cid, req)
+	if err != nil {
+		ErWsCascadePlugin.Error("WsProxy faild", zap.Error(err))
+		return
+	}
+	// 将读取的 Body 内容作为响应返回给客户端
+	w.Write(rsp)
+
+	return
+
+}

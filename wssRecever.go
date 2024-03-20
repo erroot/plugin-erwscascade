@@ -129,20 +129,18 @@ func (recever *WssRecever) ReadFLVTag() {
 /*
 推送flv 数据
 上级平台推送接口
-ws://127.0.0.1:8450/erwscascade/wspush/on
+ws://127.0.0.1:8450/erwscascade/wspush/cid/streampath
 */
 func (p *ErWsCascadeConfig) Wspush_(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get("Upgrade") != "websocket" {
 		return
 	}
-	//customHeader := r.Header.Get("X-Custom-Header")
 	// 获取完整的 URL
 	fullURL := r.URL.String()
 	//判断URL编码特殊字符%2F,%2B,%3F,%25，包含这些则自动转码?= 等
 	ErWsCascadePlugin.Info("Full URL:" + fullURL)
 
 	// 获取 cid 参数
-	//cid := r.URL.Query().Get("cid")
 	// 解码 URL
 	decodedURL, err := url.QueryUnescape(fullURL)
 	if err != nil {
@@ -176,13 +174,31 @@ func (p *ErWsCascadeConfig) Wspush_(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	streamPath := queryParams.Get("streamPath")
-	if streamPath == "" {
-		ErWsCascadePlugin.Error("wspush", zap.Error(errors.New("invalid streamPath refuse connect")))
+	//优先使用streamPath, 否则通过url 解析参数
+	// streamPath := queryParams.Get("streamPath")
+	// if streamPath == "" {
+	streamPath := ""
+	// 解析URL
+	u, err := url.Parse(r.URL.String())
+	if err != nil {
+		ErWsCascadePlugin.Error("URL 解析失败:", zap.Error(err))
+		return
+	}
+	// 获取路径
+	pathParts := strings.Split(u.Path, "/")
+	if len(pathParts) != 4 {
+		ErWsCascadePlugin.Error("wspush", zap.Error(errors.New("invalid url path")))
 		conn.Close()
 		return
 	}
 
+	for i, part := range pathParts {
+		if part == "wspush" && i+1 < len(pathParts) {
+			streamPath = pathParts[i+1] + "/" + pathParts[i+2] // 获取 wspush 后面的路径
+			ErWsCascadePlugin.Info("streamPath 值为:" + streamPath)
+		}
+	}
+	//}
 	//生成客户推送的streamPath  修改添加 cid
 	newStreamPath := streamPath + "-" + cid
 

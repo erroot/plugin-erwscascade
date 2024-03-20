@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -39,16 +40,26 @@ type WscPusher struct {
 }
 
 func NewWscPusher(cc *ErWsCascadeConfig) *WscPusher {
-	return &WscPusher{
-		Conn:         nil,
-		Cc:           cc,
-		Status:       0,
-		connectCount: 0,
-		buf:          util.Buffer(make([]byte, len(codec.FLVHeader))),
-		pool:         make(util.BytesPool, 17),
-		// buf:  util.Buffer(make([]byte, len(codec.FLVHeader))),
-		// pool: make(util.BytesPool, 17),
-	}
+
+	pusher := new(WscPusher)
+	pusher.Conn = nil
+	pusher.Cc = cc
+	pusher.Status = 0
+	pusher.connectCount = 0
+	pusher.buf = util.Buffer(make([]byte, len(codec.FLVHeader)))
+	pusher.pool = make(util.BytesPool, 17)
+
+	return pusher
+	// return new(WscPusher{
+	// 	Conn:         nil,
+	// 	Cc:           cc,
+	// 	Status:       0,
+	// 	connectCount: 0,
+	// 	buf:          util.Buffer(make([]byte, len(codec.FLVHeader))),
+	// 	pool:         make(util.BytesPool, 17),
+	// 	// buf:  util.Buffer(make([]byte, len(codec.FLVHeader))),
+	// 	// pool: make(util.BytesPool, 17),
+	// })
 }
 func (pusher *WscPusher) Disconnect() {
 	// if pusher.Closer != nil {
@@ -91,8 +102,15 @@ func (pusher *WscPusher) Connect() (err error) {
 		TLSConfig: tlsConfig,
 	}
 
-	url := pusher.RemoteURL + "?cid=" + pusher.Cc.Cid
-	url += "&streamPath=" + pusher.StreamPath
+	url := ""
+	if !strings.Contains(pusher.RemoteURL, "?cid=") {
+		url = pusher.RemoteURL + "?cid=" + pusher.Cc.CInfo.Cid
+	} else {
+		url = pusher.RemoteURL
+	}
+
+	//url := pusher.RemoteURL + "?cid=" + pusher.Cc.CInfo.Cid
+	//url += "&streamPath=" + pusher.StreamPath
 
 	pusher.Info("WscPusher try connect times:"+strconv.Itoa(pusher.connectCount), zap.String("remoteURL", url))
 

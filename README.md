@@ -36,7 +36,7 @@ erwscascade:
   push:
     repush: -1
     pushlist:
-      njtv/glgc: ws://127.0.0.1:8450/erwscascade/wspush/on #推送本地流到上级平台，新的streamPath 为 streamPath-cid
+      njtv/glgc: ws://127.0.0.1:8450/erwscascade/wspush/njtv/glgc #推送本地流到上级平台，新的streamPath 为 streamPath-cid
 ```
 ## API
 ### server API
@@ -45,9 +45,9 @@ erwscascade:
 - cid: 客户端ID(必须)
 - httpPath:  代理请求的目的地址(必须)
 
-- 示例1：请求下级平台test-c001,通过erwscascade ws 推流接口推流到上级   推送本地的流njtv/glgc 到上级平台 ws://127.0.0.1:8450/erwscascade/wspush/on 这个地址
+- 示例1：请求下级平台test-c001,通过erwscascade ws 推流接口推流到上级   推送本地的流njtv/glgc 到上级平台 ws://127.0.0.1:8450/erwscascade/wspush/njtv/glgc 这个地址 
 
-http://127.0.0.1:8450/erwscascade/httpproxy/?cid=test-c001&httpPath=/erwscascade/api/push?streamPath=njtv/glgc&target=ws://127.0.0.1:8450/erwscascade/wspush/on
+http://127.0.0.1:8450/erwscascade/httpproxy/?cid=test-c001&httpPath=/erwscascade/api/push?streamPath=njtv/glgc&target=ws://127.0.0.1:8450/erwscascade/wspush/njtv/glgc
 
 
 - 示例2:  请求下级平台 test-c001,  通过rtmp 推流接口推送流到上级  推送本地的流njtv/glgc 到上级平台 rtmp://127.0.0.1:1945/njtv/glgc-rtmp-push 这个地址
